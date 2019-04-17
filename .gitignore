@@ -29,3 +29,6 @@ hs_err_pid*
 
 # Ant
 .ant-targets-build.xml
+
+# OMNI
+__omni_tmp__
