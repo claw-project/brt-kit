@@ -4,8 +4,9 @@ contains
   subroutine sub1()
     real :: a, b, c
     integer :: d, e
-  
+
     c = sin(a)
+    c = cos(a)
     b = c ** a
 
     e = ishift(d)
