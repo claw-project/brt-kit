@@ -33,6 +33,12 @@ public class ReplacePow extends ClawTransformation {
         return new ReplacePow("exponentiation", "portable_pow");
     }
 
+    public ReplacePow() {
+      super();
+      usageModuleName = "powa";
+      powFunctionName = "br_pow";
+    }
+
     public ReplacePow(String moduleName, String funcName) {
         super();
         usageModuleName = moduleName;
@@ -41,28 +47,30 @@ public class ReplacePow extends ClawTransformation {
 
     @Override
     public boolean analyze(XcodeProgram xcodeml, Translator translator) {
-        return true;
+      return true;
     }
 
     @Override
-    public boolean canBeTransformedWith(XcodeProgram xcodeml, Transformation other) {
-        return false;
+    public boolean canBeTransformedWith(XcodeProgram xcodeml,
+                                        Transformation other)
+    {
+      return false;
     }
 
     @Override
-    public void transform(
-        XcodeProgram xcodeml,
-        Translator translator,
-        Transformation transformation
-    ) throws IllegalTransformationException {
+    public void transform(XcodeProgram xcodeml, Translator translator,
+                          Transformation transformation)
+                          throws IllegalTransformationException
+    {
         Set<Xnode> modModules = new HashSet<>();
         // get the exponentiation operator (**) usage
         List<Xnode> fPowers = xcodeml.matchAll(Xcode.F_POWER_EXPR);
+        FfunctionType fctType = addDummyFctType(xcodeml);
+
         // if there is at least one usage we try to replace it
         if (! fPowers.isEmpty()) {
             // get dummy function types in case we need to replace an
             // operator by a function call
-            String fctType = addDummyFctType(xcodeml);
             for (Xnode fPow : fPowers) {
                 Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
                 if (optModule.isPresent()) {
@@ -89,13 +97,11 @@ public class ReplacePow extends ClawTransformation {
      * @param  xcodeml The current context.
      * @return The dummy function type as a String.
      */
-    private String addDummyFctType(XcodeProgram xcodeml) {
-        Xnode dummyFctType = new FfunctionType(xcodeml);
-        dummyFctType.setAttribute(Xattr.RETURN_TYPE, Xname.TYPE_F_REAL);
-        String fctType = xcodeml.getTypeTable().generateHash(FortranType.REAL);
-        dummyFctType.setAttribute(Xattr.TYPE, fctType);
-        xcodeml.getTypeTable().add(new FfunctionType(dummyFctType));
-        return fctType;
+    private FfunctionType addDummyFctType(XcodeProgram xcodeml) {
+        FfunctionType dummyFctType =
+          xcodeml.createFunctionType(Xname.TYPE_F_REAL);
+        xcodeml.getTypeTable().add(dummyFctType);
+        return dummyFctType;
     }
 
     /**
@@ -110,18 +116,18 @@ public class ReplacePow extends ClawTransformation {
     private void replaceExponentiation(
         Xnode fPow,
         XcodeProgram xcodeml,
-        String fctType
+        FfunctionType fctType
     ) throws IllegalTransformationException {
         int nChildren = fPow.children().size();
         if (nChildren != 2)
-            throw new IllegalTransformationException(
-                    "Unexpected number of arguments: " + nChildren, fPow.lineNo()
-            );
+          throw new IllegalTransformationException(
+            "Unexpected number of arguments: " + nChildren, fPow.lineNo()
+          );
 
         Xnode functionCall = xcodeml.createFctCall(
             Xname.TYPE_F_REAL,
             powFunctionName,
-            fctType
+            fctType.getType()
         );
         Xnode argument = functionCall.matchDescendant(Xcode.ARGUMENTS);
         argument.append(fPow.child(0), true);

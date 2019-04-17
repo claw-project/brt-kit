@@ -22,6 +22,15 @@ public class AddFuncPrefix extends ClawTransformation {
     private final Set<String> functions;
     private final Set<String> modules;
 
+    public AddFuncPrefix() {
+      super();
+      this.prefix = "br_";
+      this.functions = new HashSet<>();
+      functions.add("sin");
+      this.modules = new HashSet<>();
+      modules.add("mo_br");
+    }
+
     public AddFuncPrefix(
         String prefix,
         Set<String> functions,
