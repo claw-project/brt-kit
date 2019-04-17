@@ -6,7 +6,7 @@
     <parameter key="br_function_names"
                value="cos:sin:sind:tan:acos:asin:atan:cosh:sinh:tanh:exp:log:log10:sqrt" />
     <parameter key="br_function_modules"
-               value="trigo:inversetrigo:hyperbolic:transcendental" />
+               value="trigonometric:inversetrigo:hyperbolic:transcendental:logarithm:exponentiation" />
     <parameter key="br_power_module_name" value="exponential" />
     <parameter key="br_power_function_name" value="mchpow" />
   </global>
