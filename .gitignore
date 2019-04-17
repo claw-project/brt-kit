@@ -26,3 +26,6 @@ hs_err_pid*
 *.o
 *.mod
 *.xmod
+
+# Ant
+.ant-targets-build.xml
