@@ -65,13 +65,7 @@ public class ReplacePow extends ClawTransformation {
     if (! fPowers.isEmpty()) {
       // get dummy function types in case we need to replace an
       // operator by a function call
-
-
-
       for (Xnode fPow : fPowers) {
-        replaceExponentiation(fPow, xcodeml, fctType);
-
-
         Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
         if (optModule.isPresent() && optModule.get() instanceof FmoduleDefinition)
         {
@@ -89,6 +83,7 @@ public class ReplacePow extends ClawTransformation {
           throw new IllegalTransformationException(
             "Impossible to find program, module, function or subroutine", fPow.lineNo());
         }
+        replaceExponentiation(fPow, xcodeml, fctType);
       }
     }
   }
