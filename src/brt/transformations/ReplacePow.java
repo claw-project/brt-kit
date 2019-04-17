@@ -13,6 +13,8 @@ import claw.tatsu.xcodeml.xnode.fortran.FfunctionType;
 import claw.tatsu.xcodeml.xnode.fortran.FortranType;
 import claw.wani.transformation.ClawTransformation;
 import claw.wani.x2t.configuration.Configuration;
+import claw.tatsu.xcodeml.xnode.fortran.FmoduleDefinition;
+import claw.tatsu.xcodeml.xnode.fortran.FfunctionDefinition;
 
 import java.util.HashSet;
 import java.util.List;
@@ -63,16 +65,26 @@ public class ReplacePow extends ClawTransformation {
     if (! fPowers.isEmpty()) {
       // get dummy function types in case we need to replace an
       // operator by a function call
+
+
+
       for (Xnode fPow : fPowers) {
+        replaceExponentiation(fPow, xcodeml, fctType);
+
+
         Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
-        if (optModule.isPresent()) {
-          Xnode module = optModule.get();
-          replaceExponentiation(fPow, xcodeml, fctType);
-          if (!modModules.contains(module.element())) {
-            // add the use statement
-            modModules.add(module);
-            ModuleHelper.addUse(module, usageModuleName, xcodeml);
-          }
+        if (optModule.isPresent() && optModule.get() instanceof FmoduleDefinition)
+        {
+          FmoduleDefinition module = (FmoduleDefinition) optModule.get();
+          module.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
+          // if (!modModules.contains(module.element())) {
+          //   // add the use statement
+          //   modModules.add(module);
+          //   ModuleHelper.addUse(module, usageModuleName, xcodeml);
+          // }
+        } else if(optModule.isPresent() && optModule.get() instanceof FfunctionDefinition) {
+          FfunctionDefinition fctDef = (FfunctionDefinition) optModule.get();
+          fctDef.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
         } else {
           throw new IllegalTransformationException(
             "Impossible to find program, module, function or subroutine");

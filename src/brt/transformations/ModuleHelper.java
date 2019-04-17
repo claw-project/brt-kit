@@ -19,7 +19,7 @@ public class ModuleHelper {
     Xnode module = node.findParentModule();
     // if null then find PROGRAM, FUNCTION or SUBROUTINE node
     if (module == null) {
-      Xnode pfs = node.matchAncestor(Xcode.F_FUNCTION_DEFINITION);
+      Xnode pfs = node.findParentFunction();
       // if null then there is no PROGRAM or MODULE
       if (pfs == null) {
         return Optional.empty();
