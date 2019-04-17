@@ -3,8 +3,11 @@
     <parameter key="translator" value="claw.wani.x2t.translator.ClawTranslator" />
 
     <parameter key="br_function_prefix" value="br_" />
+    <parameter key="br_function_names" value="sin:cos:tan" />
+    <parameter key="br_function_modules" value="module1:module2" />
     <parameter key="br_power_module_name" value="powa" />
     <parameter key="br_power_function_name" value="br_pow" />
+
   </global>
   <sets>
     <set name="brt-kit-set"/>
