@@ -24,13 +24,23 @@ public class AddFuncPrefix extends ClawTransformation {
   private final Set<String> functions;
   private final Set<String> modules;
 
+  private static final String BR_FUNCTION_PREFIX = "br_function_prefix";
+  private static final String BR_FUNCTION_NAMES = "br_function_names";
+  private static final String BR_FUNCTION_MODULES = "br_function_modules";
+
   public AddFuncPrefix() {
     super();
-    this.prefix = Configuration.get().getParameter("br_function_prefix");
-    this.functions = new HashSet<>();
-    functions.add("sin");
-    this.modules = new HashSet<>();
-    modules.add("mo_br");
+    this.prefix = Configuration.get().getParameter(BR_FUNCTION_PREFIX);
+
+    String functionNamesConfig =
+      Configuration.get().getParameter(BR_FUNCTION_NAMES);
+    List<String> functionNames = Arrays.asList(functionNamesConfig.split(":"));
+    this.functions = new HashSet<>(functionNames.stream()
+      .map(String::toLowerCase).collect(Collectors.toSet()));
+
+    String functionModulesConfig =
+      Configuration.get().getParameter(BR_FUNCTION_MODULES);
+    this.modules = new HashSet<>(Arrays.asList(functionModulesConfig.split(":")));
   }
 
   @Override
