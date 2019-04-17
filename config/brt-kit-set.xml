@@ -1,7 +1,7 @@
 <!--
 This file describes Bit Reproducibility Transformation Kit.
 -->
-<transformations>
+<transformations jar="brt-kit.jar">
   <transformation name="brt-add-function-prefix"
     type="independent" trigger="translation_unit" 
     class="brt.transformations.AddFuncPrefix" />
