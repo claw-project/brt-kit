@@ -12,6 +12,7 @@ import claw.tatsu.xcodeml.xnode.common.Xnode;
 import claw.tatsu.xcodeml.xnode.fortran.FfunctionType;
 import claw.tatsu.xcodeml.xnode.fortran.FortranType;
 import claw.wani.transformation.ClawTransformation;
+import claw.wani.x2t.configuration.Configuration;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,113 +27,98 @@ import java.util.Set;
  * Created by Christophe Charpilloz on 11.16.18.
  */
 public class ReplacePow extends ClawTransformation {
-    private final String usageModuleName;
-    private final String powFunctionName ;
+  private final String usageModuleName;
+  private final String powFunctionName ;
 
-    public static ReplacePow defaultPow() {
-        return new ReplacePow("exponentiation", "portable_pow");
-    }
+  public ReplacePow() {
+    super();
+    usageModuleName = Configuration.get().getParameter("br_power_module_name");
+    powFunctionName =
+      Configuration.get().getParameter("br_power_function_name");
+  }
 
-    public ReplacePow() {
-      super();
-      usageModuleName = "powa";
-      powFunctionName = "br_pow";
-    }
+  @Override
+  public boolean analyze(XcodeProgram xcodeml, Translator translator) {
+    return true;
+  }
 
-    public ReplacePow(String moduleName, String funcName) {
-        super();
-        usageModuleName = moduleName;
-        powFunctionName = funcName;
-    }
+  @Override
+  public boolean canBeTransformedWith(XcodeProgram xcodeml,
+                                      Transformation other)
+  {
+    return false;
+  }
 
-    @Override
-    public boolean analyze(XcodeProgram xcodeml, Translator translator) {
-      return true;
-    }
+  @Override
+  public void transform(XcodeProgram xcodeml, Translator translator,
+                        Transformation transformation)
+                        throws IllegalTransformationException
+  {
+    Set<Xnode> modModules = new HashSet<>();
+    // get the exponentiation operator (**) usage
+    List<Xnode> fPowers = xcodeml.matchAll(Xcode.F_POWER_EXPR);
+    FfunctionType fctType = addDummyFctType(xcodeml);
 
-    @Override
-    public boolean canBeTransformedWith(XcodeProgram xcodeml,
-                                        Transformation other)
-    {
-      return false;
-    }
-
-    @Override
-    public void transform(XcodeProgram xcodeml, Translator translator,
-                          Transformation transformation)
-                          throws IllegalTransformationException
-    {
-        Set<Xnode> modModules = new HashSet<>();
-        // get the exponentiation operator (**) usage
-        List<Xnode> fPowers = xcodeml.matchAll(Xcode.F_POWER_EXPR);
-        FfunctionType fctType = addDummyFctType(xcodeml);
-
-        // if there is at least one usage we try to replace it
-        if (! fPowers.isEmpty()) {
-            // get dummy function types in case we need to replace an
-            // operator by a function call
-            for (Xnode fPow : fPowers) {
-                Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
-                if (optModule.isPresent()) {
-                    Xnode module = optModule.get();
-                    replaceExponentiation(fPow, xcodeml, fctType);
-                    if (!modModules.contains(module.element())) {
-                        // add the use statement
-                        modModules.add(module);
-                        ModuleHelper.addUse(module, usageModuleName, xcodeml);
-                    }
-                } else {
-                    throw new IllegalTransformationException(
-                        "Impossible to find program, module, function or subroutine"
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * Return a dummy function type that is needed when adding a function call
-     * that is part of and imported (USE) module.
-     *
-     * @param  xcodeml The current context.
-     * @return The dummy function type as a String.
-     */
-    private FfunctionType addDummyFctType(XcodeProgram xcodeml) {
-        FfunctionType dummyFctType =
-          xcodeml.createFunctionType(Xname.TYPE_F_REAL);
-        xcodeml.getTypeTable().add(dummyFctType);
-        return dummyFctType;
-    }
-
-    /**
-     * Replace the usage of the exponentiation operator node by a function call
-     * node.
-     *
-     * @param fPow    the ** operator node.
-     * @param xcodeml the context.
-     * @param fctType a dummy function type.
-     * @throws IllegalTransformationException
-     */
-    private void replaceExponentiation(
-        Xnode fPow,
-        XcodeProgram xcodeml,
-        FfunctionType fctType
-    ) throws IllegalTransformationException {
-        int nChildren = fPow.children().size();
-        if (nChildren != 2)
+    // if there is at least one usage we try to replace it
+    if (! fPowers.isEmpty()) {
+      // get dummy function types in case we need to replace an
+      // operator by a function call
+      for (Xnode fPow : fPowers) {
+        Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
+        if (optModule.isPresent()) {
+          Xnode module = optModule.get();
+          replaceExponentiation(fPow, xcodeml, fctType);
+          if (!modModules.contains(module.element())) {
+            // add the use statement
+            modModules.add(module);
+            ModuleHelper.addUse(module, usageModuleName, xcodeml);
+          }
+        } else {
           throw new IllegalTransformationException(
-            "Unexpected number of arguments: " + nChildren, fPow.lineNo()
-          );
-
-        Xnode functionCall = xcodeml.createFctCall(
-            Xname.TYPE_F_REAL,
-            powFunctionName,
-            fctType.getType()
-        );
-        Xnode argument = functionCall.matchDescendant(Xcode.ARGUMENTS);
-        argument.append(fPow.child(0), true);
-        argument.append(fPow.child(1), true);
-        fPow.insertAfter(functionCall);
-        XnodeUtil.safeDelete(fPow);
+            "Impossible to find program, module, function or subroutine");
+        }
+      }
     }
+  }
+
+  /**
+   * Return a dummy function type that is needed when adding a function call
+   * that is part of and imported (USE) module.
+   *
+   * @param  xcodeml The current context.
+   * @return The dummy function type as a String.
+   */
+  private FfunctionType addDummyFctType(XcodeProgram xcodeml) {
+    FfunctionType dummyFctType = xcodeml.createFunctionType(Xname.TYPE_F_REAL);
+    xcodeml.getTypeTable().add(dummyFctType);
+    return dummyFctType;
+  }
+
+  /**
+   * Replace the usage of the exponentiation operator node by a function call
+   * node.
+   *
+   * @param fPow    the ** operator node.
+   * @param xcodeml the context.
+   * @param fctType a dummy function type.
+   * @throws IllegalTransformationException
+   */
+  private void replaceExponentiation(Xnode fPow, XcodeProgram xcodeml,
+                                     FfunctionType fctType)
+                                     throws IllegalTransformationException
+  {
+    int nChildren = fPow.children().size();
+    if (nChildren != 2) {
+      throw new IllegalTransformationException(
+        "Unexpected number of arguments: " + nChildren, fPow.lineNo());
+    }
+
+    Xnode functionCall = xcodeml.createFctCall(Xname.TYPE_F_REAL,
+      powFunctionName, fctType.getType());
+    Xnode argument = functionCall.matchDescendant(Xcode.ARGUMENTS);
+    argument.append(fPow.child(0), true);
+    argument.append(fPow.child(1), true);
+    fPow.insertAfter(functionCall);
+    XnodeUtil.safeDelete(fPow);
+  }
 }
