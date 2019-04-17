@@ -87,7 +87,7 @@ public class ReplacePow extends ClawTransformation {
           fctDef.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
         } else {
           throw new IllegalTransformationException(
-            "Impossible to find program, module, function or subroutine");
+            "Impossible to find program, module, function or subroutine", fPow.lineNo());
         }
       }
     }
