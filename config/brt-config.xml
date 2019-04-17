@@ -7,7 +7,6 @@
   </sets>
   <groups>
     <group name="brt-add-function-prefix"/>
-    <group name="brt-module-helper"/>
     <group name="brt-replace-power-expr"/>
   </groups>
 </claw>
