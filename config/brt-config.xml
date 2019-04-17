@@ -7,8 +7,8 @@
                value="cos:sin:sind:tan:acos:asin:atan:cosh:sinh:tanh:exp:log:log10:sqrt" />
     <parameter key="br_function_modules"
                value="trigo:inversetrigo:hyperbolic:transcendental" />
-    <parameter key="br_power_module_name" value="mchpow" />
-    <parameter key="br_power_function_name" value="exponential" />
+    <parameter key="br_power_module_name" value="exponential" />
+    <parameter key="br_power_function_name" value="mchpow" />
   </global>
   <sets>
     <set name="brt-kit-set"/>
