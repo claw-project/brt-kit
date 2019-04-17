@@ -85,6 +85,9 @@ public class ReplacePow extends ClawTransformation {
         }
         replaceExponentiation(fPow, xcodeml, fctType);
       }
+      for (Xnode fPow : fPowers) {
+        XnodeUtil.safeDelete(fPow);
+      }
     }
   }
 
@@ -136,6 +139,5 @@ public class ReplacePow extends ClawTransformation {
     argument.append(fPow.child(0), true);
     argument.append(fPow.child(1), true);
     fPow.insertAfter(functionCall);
-    XnodeUtil.safeDelete(fPow);
   }
 }
