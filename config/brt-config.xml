@@ -1,0 +1,13 @@
+<claw version="1.0">
+  <global type="root">
+    <parameter key="translator" value="claw.wani.x2t.translator.ClawTranslator"/>
+  </global>
+  <sets>
+    <set name="brt-kit-set"/>
+  </sets>
+  <groups>
+    <group name="brt-add-function-prefix"/>
+    <group name="brt-module-helper"/>
+    <group name="brt-replace-power-expr"/>
+  </groups>
+</claw>
