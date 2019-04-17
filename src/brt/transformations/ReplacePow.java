@@ -81,11 +81,21 @@ public class ReplacePow extends ClawTransformation {
           fctDef.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
         } else {
           throw new IllegalTransformationException(
-            "Impossible to find program, module, function or subroutine", fPow.lineNo());
+            "Impossible to find program, module, function or subroutine", getLineNo(fPow));
         }
         replaceExponentiation(fPow, xcodeml, fctType);
       }
     }
+  }
+
+  private int getLineNo(Xnode node) {
+    if(node == null) {
+      return 0;
+    }
+    if(node.lineNo() != 0 || node.ancestor() == null) {
+      return node.lineNo();
+    }
+    return getLineNo(node.ancestor());
   }
 
   /**
