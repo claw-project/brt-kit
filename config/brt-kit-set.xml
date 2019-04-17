@@ -1,0 +1,14 @@
+<!--
+This file describes Bit Reproducibility Transformation Kit.
+-->
+<transformations>
+  <transformation name="brt-add-function-prefix"
+    type="independent" trigger="translation_unit" 
+    class="brt.transformations.AddFuncPrefix" />
+  <transformation name="brt-module-helper"
+    type="independent" trigger="translation_unit" 
+    class="brt.transformations.ModuleHelper" />
+  <transformation name="brt-replace-power-expr"
+    type="independent" trigger="translation_unit" 
+    class="brt.transformations.ReplacePow" />
+</transformations>
