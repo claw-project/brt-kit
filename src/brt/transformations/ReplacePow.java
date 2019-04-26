@@ -11,6 +11,7 @@ import claw.tatsu.xcodeml.xnode.common.XcodeProgram;
 import claw.tatsu.xcodeml.xnode.common.Xnode;
 import claw.tatsu.xcodeml.xnode.fortran.FfunctionType;
 import claw.tatsu.xcodeml.xnode.fortran.FortranType;
+import claw.tatsu.xcodeml.xnode.fortran.FbasicType;
 import claw.wani.transformation.ClawTransformation;
 import claw.wani.x2t.configuration.Configuration;
 import claw.tatsu.xcodeml.xnode.fortran.FmoduleDefinition;
@@ -18,6 +19,7 @@ import claw.tatsu.xcodeml.xnode.fortran.FfunctionDefinition;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
@@ -59,35 +61,48 @@ public class ReplacePow extends ClawTransformation {
     Set<Xnode> modModules = new HashSet<>();
     // get the exponentiation operator (**) usage
     List<Xnode> fPowers = xcodeml.matchAll(Xcode.F_POWER_EXPR);
+    List<Xnode> fPowersToKill = new ArrayList<>();
     FfunctionType fctType = addDummyFctType(xcodeml);
+    System.out.println("POW Operator detected: " + fPowers.size());
+    // get dummy function types in case we need to replace an
+    // operator by a function call
+    for (Xnode fPow : fPowers) {
+      Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
+      if (optModule.isPresent() && optModule.get() instanceof FmoduleDefinition)
+      {
+        FmoduleDefinition module = (FmoduleDefinition) optModule.get();
+        module.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
+      } else if (optModule.isPresent() && optModule.get() instanceof FfunctionDefinition) {
+        FfunctionDefinition fctDef = (FfunctionDefinition) optModule.get();
+        fctDef.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
+      } else {
+        throw new IllegalTransformationException(
+          "Impossible to find program, module, function or subroutine", getLineNo(fPow));
+      }
 
-    // if there is at least one usage we try to replace it
-    if (! fPowers.isEmpty()) {
-      // get dummy function types in case we need to replace an
-      // operator by a function call
-      for (Xnode fPow : fPowers) {
-        Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
-        if (optModule.isPresent() && optModule.get() instanceof FmoduleDefinition)
-        {
-          FmoduleDefinition module = (FmoduleDefinition) optModule.get();
-          module.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
-          // if (!modModules.contains(module.element())) {
-          //   // add the use statement
-          //   modModules.add(module);
-          //   ModuleHelper.addUse(module, usageModuleName, xcodeml);
-          // }
-        } else if(optModule.isPresent() && optModule.get() instanceof FfunctionDefinition) {
-          FfunctionDefinition fctDef = (FfunctionDefinition) optModule.get();
-          fctDef.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
+      if (isInDecl(fPow)) {
+        Xnode varDecl = fPow.matchAncestor(Xcode.VAR_DECL);        
+        System.out.println("Var decl: " + varDecl);
+        System.out.println("Var decl type: " + varDecl.getType());
+        FbasicType basicType = xcodeml.getTypeTable().getBasicType(varDecl);
+        System.out.println("basic type: " + basicType);
+        if (basicType.isParameter()) {
+          System.out.println("PARAMETER TO FALSE");
+          basicType.setBooleanAttribute(Xattr.IS_PARAMETER, false);
         } else {
-          throw new IllegalTransformationException(
-            "Impossible to find program, module, function or subroutine", getLineNo(fPow));
+          System.out.println("NOT A PARAMETER");
         }
-        replaceExponentiation(fPow, xcodeml, fctType);
+      } else {
+        System.out.println("VARDECL IS NULL");        
       }
-      for (Xnode fPow : fPowers) {
-        XnodeUtil.safeDelete(fPow);
-      }
+
+      //replaceExponentiation(fPow, xcodeml, fctType);
+      fPowersToKill.add(fPow);
+    }
+
+    for (Xnode fPow : fPowersToKill) {
+      replaceExponentiation(fPow, xcodeml, fctType);
+      XnodeUtil.safeDelete(fPow);
     }
   }
 
@@ -99,6 +114,10 @@ public class ReplacePow extends ClawTransformation {
       return node.lineNo();
     }
     return getLineNo(node.ancestor());
+  }
+
+  private boolean isInDecl(Xnode node) {
+    return node.matchAncestor(Xcode.DECLARATIONS) != null;
   }
 
   /**

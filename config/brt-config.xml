@@ -6,9 +6,9 @@
     <parameter key="br_function_names"
                value="cos:sin:sind:tan:acos:asin:atan:cosh:sinh:tanh:exp:log:log10:sqrt" />
     <parameter key="br_function_modules"
-               value="trigonometric:inversetrigo:hyperbolic:transcendental:logarithm:exponentiation" />
-    <parameter key="br_power_module_name" value="exponential" />
-    <parameter key="br_power_function_name" value="portable_exp" />
+               value="trigonometric:inversetrigo:hyperbolic:logarithm:exponential" />
+    <parameter key="br_power_module_name" value="exponentiation" />
+    <parameter key="br_power_function_name" value="portable_pow" />
   </global>
   <sets>
     <set name="brt-kit-set"/>

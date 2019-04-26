@@ -4,6 +4,7 @@ contains
   subroutine sub1()
     real :: a, b, c
     integer :: d, e
+    real, parameter :: y = 2 ** PRECISION(10.0)
 
     c = sin(a)
     c = cos(a)
