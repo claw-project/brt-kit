@@ -63,7 +63,7 @@ public class ReplacePow extends ClawTransformation {
     List<Xnode> fPowers = xcodeml.matchAll(Xcode.F_POWER_EXPR);
     List<Xnode> fPowersToKill = new ArrayList<>();
     FfunctionType fctType = addDummyFctType(xcodeml);
-    System.out.println("POW Operator detected: " + fPowers.size());
+    
     // get dummy function types in case we need to replace an
     // operator by a function call
     for (Xnode fPow : fPowers) {
@@ -82,21 +82,13 @@ public class ReplacePow extends ClawTransformation {
 
       if (isInDecl(fPow)) {
         Xnode varDecl = fPow.matchAncestor(Xcode.VAR_DECL);        
-        System.out.println("Var decl: " + varDecl);
-        System.out.println("Var decl type: " + varDecl.getType());
         FbasicType basicType = xcodeml.getTypeTable().getBasicType(varDecl);
-        System.out.println("basic type: " + basicType);
         if (basicType.isParameter()) {
           System.out.println("PARAMETER TO FALSE");
           basicType.setBooleanAttribute(Xattr.IS_PARAMETER, false);
-        } else {
-          System.out.println("NOT A PARAMETER");
         }
-      } else {
-        System.out.println("VARDECL IS NULL");        
       }
 
-      //replaceExponentiation(fPow, xcodeml, fctType);
       fPowersToKill.add(fPow);
     }
 
