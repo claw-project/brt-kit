@@ -60,18 +60,20 @@ public class AddFuncPrefix extends ClawTransformation {
                         Transformation transformation)
                         throws IllegalTransformationException
   {
-    Stream<Xnode> modProgFuncSub =
-      xcodeml.matchAll(Xcode.FUNCTION_CALL).stream().filter(
-        x -> functions.contains(x.matchDescendant(Xcode.NAME).value().toLowerCase())
-      ).map(y -> {
-        Xnode nameName = y.matchDescendant(Xcode.NAME);
-        nameName.setValue(prefix + nameName.value());
-        return ModuleHelper.getModule(y);
-      })
-      .filter(o -> o.isPresent())
-      .map(o -> o.get());
+    //Stream<Xnode> modProgFuncSub =
+    xcodeml.matchAll(Xcode.FUNCTION_CALL).stream().filter(
+      x -> functions.contains(x.matchDescendant(Xcode.NAME).value().toLowerCase())
+    ).forEach(y -> {
+      Xnode nameName = y.matchDescendant(Xcode.NAME);
+      nameName.setValue(prefix + nameName.value());
+      ModuleHelper.addUses(y, modules, xcodeml)
+      //return y;
+      //return ModuleHelper.getModule(y);
+    });
+      //.filter(o -> o.isPresent())
+      //.map(o -> o.get());
 
-      modProgFuncSub.collect(Collectors.toSet())
-        .forEach(x -> ModuleHelper.addUses(x, modules, xcodeml));
+      //modProgFuncSub.collect(Collectors.toSet())
+      //  .forEach(x -> ModuleHelper.addUses(x, modules, xcodeml));
   }
 }

@@ -34,21 +34,30 @@ public class ModuleHelper {
   /**
    * Add a USE statement of the module named moduleName in the current module.
    *
-   * @param currentModule The current module as an Xnode.
+   * @param currentNode The current node as an Xnode.
    * @param moduleName The name of the module imported by the USE statement.
    * @param xcodeml The current context.
    */
-  public static void addUse(Xnode currentModule, String moduleName,
+  public static void addUse(Xnode currentNode, String moduleName,
                             XcodeProgram xcodeml)
   {
-    Xnode use = xcodeml.createNode(Xcode.F_USE_DECL);
-    use.setAttribute(Xattr.NAME, moduleName);
-    currentModule.matchDirectDescendant(Xcode.DECLARATIONS).insert(use, false);
+    Optional<Xnode> optModule = ModuleHelper.getModule(currentNode);
+    if (optModule.isPresent() && optModule.get() instanceof FmoduleDefinition)
+    {
+      FmoduleDefinition module = (FmoduleDefinition) optModule.get();
+      module.getDeclarationTable().insertUseDecl(xcodeml, moduleName);
+    } else if (optModule.isPresent() && optModule.get() instanceof FfunctionDefinition) {
+      FfunctionDefinition fctDef = (FfunctionDefinition) optModule.get();
+      fctDef.getDeclarationTable().insertUseDecl(xcodeml, moduleName);
+    } else {
+      throw new IllegalTransformationException(
+        "Impossible to find program, module, function or subroutine", getLineNo(currentNode));
+    }
   }
 
-  public static void addUses(Xnode currentModule, Collection<String> moduleName,
+  public static void addUses(Xnode currentNode, Collection<String> moduleName,
                              XcodeProgram xcodeml)
   {
-    moduleName.forEach(name -> addUse(currentModule, name, xcodeml));
+    moduleName.forEach(name -> addUse(currentNode, name, xcodeml));
   }
 }

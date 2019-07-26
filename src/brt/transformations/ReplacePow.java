@@ -67,18 +67,7 @@ public class ReplacePow extends ClawTransformation {
     // get dummy function types in case we need to replace an
     // operator by a function call
     for (Xnode fPow : fPowers) {
-      Optional<Xnode> optModule = ModuleHelper.getModule(fPow);
-      if (optModule.isPresent() && optModule.get() instanceof FmoduleDefinition)
-      {
-        FmoduleDefinition module = (FmoduleDefinition) optModule.get();
-        module.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
-      } else if (optModule.isPresent() && optModule.get() instanceof FfunctionDefinition) {
-        FfunctionDefinition fctDef = (FfunctionDefinition) optModule.get();
-        fctDef.getDeclarationTable().insertUseDecl(xcodeml, usageModuleName);
-      } else {
-        throw new IllegalTransformationException(
-          "Impossible to find program, module, function or subroutine", getLineNo(fPow));
-      }
+      ModuleHelper.addUse(fPow, usageModuleName, xcodeml);
 
       if (! isInDecl(fPow)) {
         fPowersToKill.add(fPow);
