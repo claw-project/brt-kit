@@ -66,7 +66,7 @@ public class AddFuncPrefix extends ClawTransformation {
     ).forEach(y -> {
       Xnode nameName = y.matchDescendant(Xcode.NAME);
       nameName.setValue(prefix + nameName.value());
-      ModuleHelper.addUses(y, modules, xcodeml)
+      ModuleHelper.addUses(y, modules, xcodeml);
       //return y;
       //return ModuleHelper.getModule(y);
     });
