@@ -80,16 +80,6 @@ public class ReplacePow extends ClawTransformation {
     }
   }
 
-  private int getLineNo(Xnode node) {
-    if(node == null) {
-      return 0;
-    }
-    if(node.lineNo() != 0 || node.ancestor() == null) {
-      return node.lineNo();
-    }
-    return getLineNo(node.ancestor());
-  }
-
   private boolean isInDecl(Xnode node) {
     return node.matchAncestor(Xcode.DECLARATIONS) != null;
   }
