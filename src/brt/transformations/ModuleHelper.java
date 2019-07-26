@@ -4,6 +4,9 @@ import claw.tatsu.xcodeml.xnode.common.Xattr;
 import claw.tatsu.xcodeml.xnode.common.Xcode;
 import claw.tatsu.xcodeml.xnode.common.XcodeProgram;
 import claw.tatsu.xcodeml.xnode.common.Xnode;
+import claw.tatsu.xcodeml.xnode.fortran.FmoduleDefinition;
+import claw.tatsu.xcodeml.xnode.fortran.FfunctionDefinition;
+import claw.tatsu.xcodeml.exception.IllegalTransformationException;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -39,7 +42,8 @@ public class ModuleHelper {
    * @param xcodeml The current context.
    */
   public static void addUse(Xnode currentNode, String moduleName,
-                            XcodeProgram xcodeml)
+                            XcodeProgram xcodeml) 
+    throws IllegalTransformationException
   {
     Optional<Xnode> optModule = ModuleHelper.getModule(currentNode);
     if (optModule.isPresent() && optModule.get() instanceof FmoduleDefinition)
@@ -51,13 +55,16 @@ public class ModuleHelper {
       fctDef.getDeclarationTable().insertUseDecl(xcodeml, moduleName);
     } else {
       throw new IllegalTransformationException(
-        "Impossible to find program, module, function or subroutine", getLineNo(currentNode));
+        "Impossible to find program, module, function or subroutine", currentNode.lineNo());
     }
   }
 
-  public static void addUses(Xnode currentNode, Collection<String> moduleName,
+  public static void addUses(Xnode currentNode, Collection<String> moduleNames,
                              XcodeProgram xcodeml)
+    throws IllegalTransformationException
   {
-    moduleName.forEach(name -> addUse(currentNode, name, xcodeml));
+    for(String moduleName : moduleNames){
+      addUse(currentNode, moduleName, xcodeml);
+    }
   }
 }
