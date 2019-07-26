@@ -80,16 +80,9 @@ public class ReplacePow extends ClawTransformation {
           "Impossible to find program, module, function or subroutine", getLineNo(fPow));
       }
 
-      if (isInDecl(fPow)) {
-        Xnode varDecl = fPow.matchAncestor(Xcode.VAR_DECL);        
-        FbasicType basicType = xcodeml.getTypeTable().getBasicType(varDecl);
-        if (basicType.isParameter()) {
-          System.out.println("PARAMETER TO FALSE");
-          basicType.setBooleanAttribute(Xattr.IS_PARAMETER, false);
-        }
+      if (! isInDecl(fPow)) {
+        fPowersToKill.add(fPow);
       }
-
-      fPowersToKill.add(fPow);
     }
 
     for (Xnode fPow : fPowersToKill) {
